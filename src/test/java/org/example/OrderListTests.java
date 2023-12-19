@@ -1,5 +1,6 @@
 package org.example;
 
+import io.qameta.allure.junit4.DisplayName;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.junit.Before;
@@ -12,17 +13,13 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.*;
 
 
-public class OrderListTests {
-
-    @Before
-    public void setUp() {
-        RestAssured.baseURI = "https://qa-scooter.praktikum-services.ru";
-    }
+public class OrderListTests extends BaseTest {
+    private HttpClient httpClient = new HttpClient();
 
     @Test
+    @DisplayName("checkOrderList")
     public void checkOrderList() {
-        given()
-                .get("/api/v1/orders")
+        httpClient.CallGet("/api/v1/orders")
                 .then().assertThat().body("orders", hasSize(greaterThan(0)));
     }
 }

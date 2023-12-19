@@ -1,131 +1,105 @@
 package org.example;
 
+import io.qameta.allure.junit4.DisplayName;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
-public class LoginCourierTests {
+public class LoginCourierTests extends BaseTest {
+    private String login;
+    private HttpClient httpClient = new HttpClient();
     @Before
     public void setUp() {
-        RestAssured.baseURI = "https://qa-scooter.praktikum-services.ru";
+        login = UUID.randomUUID().toString();
+        super.setUp();
     }
-
-    @Test
-    public void loginCourier() {
-            String json = "{\"login\": \"uncleF11\", \"password\": \"1234\"}";
-            Response response =
+    @After
+    public void tearDown() {
+        Login loginObj = new Login(login , "1234");
+        Response loginResponse = httpClient.CallPost(loginObj, "/api/v1/courier/login");
+        if(loginResponse.body().toString().contains("id")){
+            int id = loginResponse.body().jsonPath().get("id");
+            Response deleteResponse =
                     given()
                             .header("Content-type", "application/json")
                             .and()
-                            .body(json)
                             .when()
-                            .post("/api/v1/courier/login");
+                            .delete("/api/v1/courier/"+id);
+            deleteResponse.then().assertThat().statusCode(200);
+        }
+    }
+
+    @Test
+    @DisplayName("loginCourier")
+    public void loginCourier() {
+        Login loginObj = new Login("uncleF11" , "1234");
+            Response response = httpClient.CallPost(loginObj, "/api/v1/courier/login");
             response.then().assertThat().statusCode(200);
     }
 
     @Test
+    @DisplayName("authorizedCourier")
     public void authorizedCourier() {
-        String json1 = "{\"login\": \"uncleF11\", \"password\": \"\"}";
-        String json2 = "{\"login\": \"\", \"password\": \"1234\"}";
-        Response response1 =
-                given()
-                        .header("Content-type", "application/json")
-                        .and()
-                        .body(json1)
-                        .when()
-                        .post("/api/v1/courier/login");
+        Login loginObj1 = new Login("uncleF11" , "");
+        Login loginObj2 = new Login("" , "1234");
+        Response response1 = httpClient.CallPost(loginObj1, "/api/v1/courier/login");
         response1.then().assertThat().statusCode(400);
 
-        Response response2 =
-                given()
-                        .header("Content-type", "application/json")
-                        .and()
-                        .body(json2)
-                        .when()
-                        .post("/api/v1/courier/login");
+        Response response2 = httpClient.CallPost(loginObj2, "/api/v1/courier/login");
         response2.then().assertThat().statusCode(400);
     }
 
     @Test
+    @DisplayName("checkCorrectData")
     public void checkCorrectData() {
-        String json1 = "{\"login\": \"ninja\", \"password\": \"1234\"}";
-        String json2 = "{\"login\": \"uncleF11\", \"password\": \"123455\"}";
-        Response response1 =
-                given()
-                        .header("Content-type", "application/json")
-                        .and()
-                        .body(json1)
-                        .when()
-                        .post("/api/v1/courier/login");
+        Login loginObj1 = new Login("ninja" , "1234");
+        Login loginObj2 = new Login("uncleF11" , "123455");
+        Response response1 = httpClient.CallPost(loginObj1, "/api/v1/courier/login");
         response1.then().assertThat().body("message", equalTo("Учетная запись не найдена"))
                 .and()
                 .statusCode(404);
 
-        Response response2 =
-                given()
-                        .header("Content-type", "application/json")
-                        .and()
-                        .body(json2)
-                        .when()
-                        .post("/api/v1/courier/login");
+        Response response2 = httpClient.CallPost(loginObj2, "/api/v1/courier/login");
         response2.then().assertThat().body("message", equalTo("Учетная запись не найдена"))
                 .and()
                 .statusCode(404);
     }
 
     @Test
+    @DisplayName("errorOnEmptyField")
     public void errorOnEmptyField() {
-        String json1 = "{\"login\": \"uncleF11\", \"password\": \"\"}";
-        String json2 = "{\"login\": \"\", \"password\": \"1234\"}";
-        Response response1 =
-                given()
-                        .header("Content-type", "application/json")
-                        .and()
-                        .body(json1)
-                        .when()
-                        .post("/api/v1/courier/login");
+        Login loginObj1 = new Login("uncleF11" , "");
+        Login loginObj2 = new Login("" , "1234");
+        Response response1 = httpClient.CallPost(loginObj1, "/api/v1/courier/login");
         response1.then().assertThat().body("message", equalTo("Недостаточно данных для входа"));
 
-        Response response2 =
-                given()
-                        .header("Content-type", "application/json")
-                        .and()
-                        .body(json2)
-                        .when()
-                        .post("/api/v1/courier/login");
+        Response response2 = httpClient.CallPost(loginObj2, "/api/v1/courier/login");
         response2.then().assertThat().body("message", equalTo("Недостаточно данных для входа"));
     }
 
 
     @Test
+    @DisplayName("errorOnWrongLogin")
     public void errorOnWrongLogin() {
-        String json = "{\"login\": \"0000\", \"password\": \"1234\"}";
-        Response response =
-                given()
-                        .header("Content-type", "application/json")
-                        .and()
-                        .body(json)
-                        .when()
-                        .post("/api/v1/courier/login");
+        Login loginObj = new Login("0000" , "1234");
+        Response response = httpClient.CallPost(loginObj, "/api/v1/courier/login");
         response.then().assertThat().body("message", equalTo("Учетная запись не найдена"))
                 .and()
                 .statusCode(404);
     }
 
     @Test
+    @DisplayName("successResultWithIdTest")
     public void successResultWithIdTest() {
-        String json = "{\"login\": \"uncleF11\", \"password\": \"1234\"}";
-        Response response =
-                given()
-                        .header("Content-type", "application/json")
-                        .and()
-                        .body(json)
-                        .when()
-                        .post("/api/v1/courier/login");
+        Login loginObj = new Login("uncleF11" , "1234");
+        Response response = httpClient.CallPost(loginObj, "/api/v1/courier/login");
         response.then().assertThat().body("id", notNullValue());
     }
 }
