@@ -1,4 +1,4 @@
-package org.example;
+package main.models;
 
 public class Login {
     private String login;

@@ -1,4 +1,4 @@
-package org.example;
+package main;
 
 import io.restassured.RestAssured;
 import org.junit.Before;

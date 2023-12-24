@@ -1,4 +1,4 @@
-package org.example;
+package main.models;
 
 public class Order {
         private String firstName;
