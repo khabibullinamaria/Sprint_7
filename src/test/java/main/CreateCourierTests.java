@@ -54,8 +54,8 @@ public class CreateCourierTests extends BaseTest {
     }
 
     @Test
-    @DisplayName("errorOnIfNotAllFields")
-    public void errorOnIfNotAllFields() {
+    @DisplayName("errorIfLoginNull")
+    public void errorIfLoginNull() {
         Courier nullLoginCourier = new Courier(null, "1234", "Дядя 666");
 
         Response nullLoginResponse = httpClient.callPost(nullLoginCourier, "/api/v1/courier");
@@ -65,8 +65,8 @@ public class CreateCourierTests extends BaseTest {
     }
 
     @Test
-    @DisplayName("errorOnIfNotAllFields")
-    public void errorOnIfNotAllFields() {
+    @DisplayName("errorIfPasswordNull")
+    public void errorIfPasswordNull() {
         Courier nullPassCourier = new Courier(login , null, "Дядя 666");
 
         Response nullPassResponse = httpClient.callPost(nullPassCourier, "/api/v1/courier");

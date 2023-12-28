@@ -31,23 +31,19 @@ public class LoginCourierTests extends BaseTest {
     public void tearDown() {
         Login loginObj = new Login(login, password);
         Response loginResponse = httpClient.callPost(loginObj, "/api/v1/courier/login");
-        if(loginResponse.body().toString().contains("id")){
+        if(loginResponse.body().toString().contains("id")) {
             int id = loginResponse.body().jsonPath().get("id");
-            Response deleteResponse =
-                    given()
-                            .header("Content-type", "application/json")
-                            .and()
-                            .when()
-                            .delete("/api/v1/courier/"+id);
+            httpClient.callDelete("/api/v1/courier/" + id);
         }
     }
 
     @Test
-    @DisplayName("loginCourier")
-    public void loginCourier() {
+    @DisplayName("successLoginCourier")
+    public void successLoginCourier() {
         Login loginObj = new Login(login, password);
-            Response response = httpClient.callPost(loginObj, "/api/v1/courier/login");
-            response.then().assertThat().statusCode(200);
+        Response response = httpClient.callPost(loginObj, "/api/v1/courier/login");
+        response.then().assertThat().statusCode(200);
+        response.then().assertThat().body("id", notNullValue());
     }
 
     @Test
@@ -103,13 +99,5 @@ public class LoginCourierTests extends BaseTest {
         response.then().assertThat().body("message", equalTo("Учетная запись не найдена"))
                 .and()
                 .statusCode(404);
-    }
-
-    @Test
-    @DisplayName("successResultWithIdTest")
-    public void successResultWithIdTest() {
-        Login loginObj = new Login(login, password);
-        Response response = httpClient.callPost(loginObj, "/api/v1/courier/login");
-        response.then().assertThat().body("id", notNullValue());
     }
 }
