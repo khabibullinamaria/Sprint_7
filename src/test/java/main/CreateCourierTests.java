@@ -34,11 +34,12 @@ public class CreateCourierTests extends BaseTest {
     }
 
     @Test
-    @DisplayName("createCourier")
-    public void createCourier() {
+    @DisplayName("successCreateCourier")
+    public void successCreateCourier() {
         Courier courierObj = new Courier(login , "1234", "Дядя Fedor");
         Response response = httpClient.callPost(courierObj, "/api/v1/courier");
         response.then().assertThat().statusCode(201);
+        response.then().assertThat().body("ok", equalTo(true));
     }
 
     @Test
@@ -53,53 +54,25 @@ public class CreateCourierTests extends BaseTest {
     }
 
     @Test
-    @DisplayName("checkRequiredFields")
-    public void checkRequiredFields() {
-        Courier nullPassCourier = new Courier(login , null, "Дядя 666");
+    @DisplayName("errorOnIfNotAllFields")
+    public void errorOnIfNotAllFields() {
         Courier nullLoginCourier = new Courier(null, "1234", "Дядя 666");
-
-        Response nullPassResponse = httpClient.callPost(nullPassCourier, "/api/v1/courier");
-        nullPassResponse.then().assertThat().body("message", equalTo("Недостаточно данных для создания учетной записи"))
-                .and()
-                .statusCode(400);
 
         Response nullLoginResponse = httpClient.callPost(nullLoginCourier, "/api/v1/courier");
         nullLoginResponse.then().assertThat().body("message", equalTo("Недостаточно данных для создания учетной записи"))
                 .and()
                 .statusCode(400);
-    }
-
-    @Test
-    @DisplayName("checkCorrectStatusCode")
-    public void checkCorrectStatusCode() {
-        Courier courierObj = new Courier(login , "1234", "Дядя Федор132");
-        Response response = httpClient.callPost(courierObj, "/api/v1/courier");
-        response.then().assertThat().statusCode(201);
-    }
-
-    @Test
-    @DisplayName("checkSuccessResponseText")
-    public void checkSuccessResponseText() {
-        Courier courierObj = new Courier(login , "1234", "Дядя Федор1335");
-        Response response = httpClient.callPost(courierObj, "/api/v1/courier");
-        response.then().assertThat().body("ok", equalTo(true));
     }
 
     @Test
     @DisplayName("errorOnIfNotAllFields")
     public void errorOnIfNotAllFields() {
         Courier nullPassCourier = new Courier(login , null, "Дядя 666");
-        Courier nullLoginCourier = new Courier(null, "1234", "Дядя 666");
 
         Response nullPassResponse = httpClient.callPost(nullPassCourier, "/api/v1/courier");
         nullPassResponse.then().assertThat().body("message", equalTo("Недостаточно данных для создания учетной записи"))
-                .and()
-                .statusCode(400);
-
-        Response nullLoginResponse = httpClient.callPost(nullLoginCourier, "/api/v1/courier");
-        nullLoginResponse.then().assertThat().body("message", equalTo("Недостаточно данных для создания учетной записи"))
-                .and()
-                .statusCode(400);
+            .and()
+            .statusCode(400);
     }
 
     @Test

@@ -51,12 +51,17 @@ public class LoginCourierTests extends BaseTest {
     }
 
     @Test
-    @DisplayName("authorizedCourier")
-    public void authorizedCourier() {
+    @DisplayName("loginWithoutPass")
+    public void loginWithoutPass() {
         Login loginWithoutPass = new Login("uncleF11", "");
-        Login loginWithoutLogin = new Login("", "1234");
         Response responseWithoutPass = httpClient.callPost(loginWithoutPass, "/api/v1/courier/login");
         responseWithoutPass.then().assertThat().statusCode(400);
+    }
+
+    @Test
+    @DisplayName("loginWithoutLogin")
+    public void loginWithoutLogin() {
+        Login loginWithoutLogin = new Login("", "1234");
 
         Response responseWithoutLogin = httpClient.callPost(loginWithoutLogin, "/api/v1/courier/login");
         responseWithoutLogin.then().assertThat().statusCode(400);
@@ -64,32 +69,31 @@ public class LoginCourierTests extends BaseTest {
 
     @Test
     @DisplayName("checkCorrectData")
-    public void checkCorrectData() {
-        Login firstLogin = new Login("ninja" , "1234");
-        Login secondLogin = new Login("uncleF11" , "123455");
-        Response firstResponse = httpClient.callPost(firstLogin, "/api/v1/courier/login");
-        firstResponse.then().assertThat().body("message", equalTo("Учетная запись не найдена"))
-                .and()
-                .statusCode(404);
-
-        Response secondResponse = httpClient.callPost(secondLogin, "/api/v1/courier/login");
-        secondResponse.then().assertThat().body("message", equalTo("Учетная запись не найдена"))
-                .and()
-                .statusCode(404);
+    public void notCreatedAccount() {
+        Login login = new Login("ninja" , "1234");
+        Response response = httpClient.callPost(login, "/api/v1/courier/login");
+        response.then().assertThat().body("message", equalTo("Учетная запись не найдена"))
+            .and()
+            .statusCode(404);
     }
 
     @Test
-    @DisplayName("errorOnEmptyField")
-    public void errorOnEmptyField() {
+    @DisplayName("errorOnEmptyPassField")
+    public void errorOnEmptyPassField() {
         Login loginWithoutPass = new Login("uncleF11" , "");
-        Login loginWithoutLogin = new Login("" , "1234");
+
         Response responseWithoutPass = httpClient.callPost(loginWithoutPass, "/api/v1/courier/login");
         responseWithoutPass.then().assertThat().body("message", equalTo("Недостаточно данных для входа"));
+    }
+
+    @Test
+    @DisplayName("errorOnEmptyLoginField")
+    public void errorOnEmptyLoginField() {
+        Login loginWithoutLogin = new Login("" , "1234");
 
         Response responseWithoutLogin = httpClient.callPost(loginWithoutLogin, "/api/v1/courier/login");
         responseWithoutLogin.then().assertThat().body("message", equalTo("Недостаточно данных для входа"));
     }
-
 
     @Test
     @DisplayName("errorOnWrongLogin")
